@@ -16,7 +16,7 @@ function getRoll20SessionCookie(username, password) {
         return reject(err)
       }
 
-      if (httpResponse.statusCode !== 303 || httpResponse.headers['location'] !== 'https://app.roll20.net/home') {
+      if (httpResponse.statusCode !== 303 || httpResponse.headers['location'] !== 'https://app.roll20.net/home/') {
         return reject(new Error('Invalid Roll20 credentials!'))
       }
 
