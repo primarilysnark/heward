@@ -35,8 +35,6 @@ function getRoll20SessionCookie(username, password) {
         .filter((cookie, index, cookies) => {
           const cookieName = cookie.slice(0, cookie.indexOf('=') + 1);
 
-          console.log(cookieName);
-
           if (cookies.some(otherCookie => otherCookie.startsWith(cookieName))) {
             return cookies.filter(otherCookie => otherCookie.startsWith(cookieName)).sort().reverse()[0] === cookie
           }
