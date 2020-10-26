@@ -16,26 +16,34 @@ function getRoll20SessionCookie(username, password) {
         return reject(err)
       }
 
-      if (httpResponse.statusCode !== 303 || httpResponse.headers['location'] !== 'https://app.roll20.net/home') {
+      if (httpResponse.statusCode !== 303 || httpResponse.headers['location'] !== 'https://app.roll20.net/home/') {
         return reject(new Error('Invalid Roll20 credentials!'))
       }
 
-      const cookies = httpResponse.headers['set-cookie'].reduce((cookies, setCookie) => {
-        const cookie = parseCookie(setCookie)
-        delete cookie.domain
-        delete cookie.path
-        delete cookie.expires
+      const cookies = httpResponse.headers['set-cookie']
+        .reduce((cookies, setCookie) => {
+          const cookie = parseCookie(setCookie)
+          delete cookie.domain
+          delete cookie.path
+          delete cookie.expires
 
-        return [
-          ...cookies,
-          ...Object.keys(cookie).map(value => `${value}=${cookie[value]}`)
-        ]
+          return [
+            ...cookies,
+            ...Object.keys(cookie).map(value => `${value}=${cookie[value]}`)
+          ]
+        }, [])
+        .filter((cookie, index, cookies) => {
+          const cookieName = cookie.slice(0, cookie.indexOf('=') + 1);
 
-        return {
-          ...cookies,
-          ...parsed
-        }
-      }, []).join('; ')
+          console.log(cookieName);
+
+          if (cookies.some(otherCookie => otherCookie.startsWith(cookieName))) {
+            return cookies.filter(otherCookie => otherCookie.startsWith(cookieName)).sort().reverse()[0] === cookie
+          }
+
+          return true
+        })
+        .join('; ')
 
       resolve(cookies)
     })
@@ -69,13 +77,14 @@ function getScriptFromDOM(html, campaignId) {
     virtualConsole
   })
 
-  if (!dom.window.currentscripts.includes('heward.js')) {
+  const scriptNode = dom.window.document.querySelector('[data-scriptname="heward.js"]')
+  if (scriptNode === null) {
     console.log('No existing Roll20 campaign script found.')
     console.log('Creating a new Roll20 campaign script...')
     return 'new'
   }
 
-  const scriptId = dom.window.document.querySelector('[data-scriptname="heward.js"]').id.slice('script-'.length)
+  const scriptId = scriptNode.id.slice('script-'.length)
 
   dom.window.close()
 
