@@ -67,7 +67,7 @@ function getRoll20ScriptsForCampaign(cookie, campaignId) {
   })
 }
 
-function getScriptFromDOM(html, campaignId) {
+function getScriptFromDOM(html, campaignId, name) {
   const virtualConsole = new jsdom.VirtualConsole();
   const dom = new jsdom.JSDOM(html, {
     url: `https://app.roll20.net/campaigns/scripts/${campaignId}`,
@@ -75,7 +75,7 @@ function getScriptFromDOM(html, campaignId) {
     virtualConsole
   })
 
-  const scriptNode = dom.window.document.querySelector('[data-scriptname="heward.js"]')
+  const scriptNode = dom.window.document.querySelector(`[data-scriptname="${name}"]`)
   if (scriptNode === null) {
     console.log('No existing Roll20 campaign script found.')
     console.log('Creating a new Roll20 campaign script...')
@@ -91,7 +91,7 @@ function getScriptFromDOM(html, campaignId) {
   return scriptId
 }
 
-function saveScriptToRoll20(code, campaignId, scriptId, cookie) {
+function saveScriptToRoll20(code, campaignId, scriptId, cookie, name) {
   console.log(`Deploying script #${scriptId}...`)
 
   return new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ function saveScriptToRoll20(code, campaignId, scriptId, cookie) {
         'Cookie': cookie
       },
       formData: {
-        name: 'heward.js',
+        name,
         content: code
       }
     }, (err, httpResponse, body) => {
@@ -118,8 +118,8 @@ module.exports = function deploy(code, options) {
   return getRoll20SessionCookie(options.roll20.username, options.roll20.password)
     .then(cookie => {
       return getRoll20ScriptsForCampaign(cookie, options.roll20.campaign)
-        .then(html => getScriptFromDOM(html, options.roll20.campaign))
-        .then(scriptId => saveScriptToRoll20(code, options.roll20.campaign, scriptId, cookie))
+        .then(html => getScriptFromDOM(html, options.roll20.campaign, options.name))
+        .then(scriptId => saveScriptToRoll20(code, options.roll20.campaign, scriptId, cookie, options.name))
     })
     .then(() => {
       console.log('Deployed script to Roll20!')

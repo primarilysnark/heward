@@ -9,6 +9,10 @@
     .version()
     .alias('version', 'v')
     .options({
+      name: {
+        type: 'string',
+        describe: 'Name for your script on Roll20.'
+      },
       script: {
         type: 'string',
         describe: 'Path to your Roll20 script',
@@ -44,6 +48,7 @@
 
       require('../src/index')({
         script: argv.script,
+        name: argv.name || 'heward.js',
         roll20: {
           campaign: argv.campaign || process.env.ROLL20_CAMPAIGN,
           username: argv.username || process.env.ROLL20_USERNAME,
