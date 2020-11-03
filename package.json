@@ -1,6 +1,6 @@
 {
   "name": "heward",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A roll20 script build and deployment tool.",
   "main": "./bin/cli.js",
   "bin": {
